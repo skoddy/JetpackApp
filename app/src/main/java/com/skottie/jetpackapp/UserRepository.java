@@ -8,6 +8,9 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import retrofit2.Call;
@@ -44,5 +47,31 @@ public class UserRepository {
                 }
             }
         });
+    }
+
+    public LiveData<Resource<User>> loadUser(final String userId) {
+        return new NetworkBoundResource<User,User>() {
+            @Override
+            protected void saveCallResult(@NonNull User item) {
+                userDao.save(item);
+            }
+
+            @Override
+            protected boolean shouldFetch(@Nullable User data) {
+                return rateLimiter.canFetch(userId)
+                        && (data == null || !isFresh(data));
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<User> loadFromDb() {
+                return userDao.load(userId);
+            }
+
+            @NonNull @Override
+            protected LiveData<ApiResponse<User>> createCall() {
+                return webservice.getUser(userId);
+            }
+        }.getAsLiveData();
     }
 }

@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 public class User {
     @PrimaryKey
     private int id;
+    private long last_update;
     private String displayName;
     public User() {}
 

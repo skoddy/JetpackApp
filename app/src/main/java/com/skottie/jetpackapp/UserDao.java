@@ -11,8 +11,13 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public interface UserDao {
+
     @Insert(onConflict = REPLACE)
     void save(User user);
+
     @Query("SELECT * FROM user WHERE id = :userId")
-    LiveData<User> load(int userId);
+    LiveData<User> load(String userId);
+
+    @Query("SELECT COUNT(*) FROM user WHERE id == :userId AND last_update >= :timeout")
+    int hasUser(int userId, long timeout);
 }
